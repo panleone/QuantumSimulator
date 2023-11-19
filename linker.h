@@ -12,4 +12,12 @@ extern "C" void zgetrs_(char *TRANS, int *N, int *NRHS, std::complex<double> *A,
 // Computes the eigenvalues of the hermitian matrix A
 extern "C" void zheev_( char* jobz, char* uplo, int* n, std::complex<double>* A, int* lda,
                 double* w, std::complex<double>* work, int* lwork, double* rwork, int* info );
+extern "C" void zheevd_( char* jobz, char* uplo, int* n, std::complex<double>* A, int* lda,
+                double* w, std::complex<double>* work, int* lwork, double* rwork, int* lrwork,
+                int* iwork, int* liwork, int* info );
+extern "C" void zheev_2stage_( char* jobz, char* uplo, int* n, std::complex<double>* A, int* lda,
+                double* w, std::complex<double>* work, int* lwork, double* rwork, int* info );
+extern "C" void zheevd_2stage_( char* jobz, char* uplo, int* n, std::complex<double>* A, int* lda,
+                double* w, std::complex<double>* work, int* lwork, double* rwork, int* lrwork,
+                int* iwork, int* liwork, int* info );
 #endif //LINKER

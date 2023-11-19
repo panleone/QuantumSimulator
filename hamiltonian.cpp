@@ -59,6 +59,6 @@ const HermitianMatrix& Hamiltonian::getHamiltonian() const {
 
 
 bool Hamiltonian::solve(char JOBZ){
-    return H.findSpectrum(JOBZ);
+    return H.findSpectrumAlg2(JOBZ);
 }
 

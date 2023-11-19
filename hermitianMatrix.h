@@ -39,6 +39,8 @@ class HermitianMatrix : public Matrix<std::complex<double>>
          * @return true iff the opeartion was successful
          */
         bool findSpectrum(char JOBZ);
+        // Same as findSpectrum but uses a different algorithm
+        bool findSpectrumAlg2(char JOBZ);
 
         bool isSolved() const;
         const std::vector<double>& getEigenValues() const;
