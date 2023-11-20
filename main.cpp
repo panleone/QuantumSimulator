@@ -71,7 +71,7 @@ int main(int argc, char **argv){
 
     // Create the Hamiltonian and set potential with a lambda
     Hamiltonian H1(grid, mass);
-    H1.SetPotential( [](double x, double m) { return omega*m*x*x/2;});
+    H1.setPotential( [](double x, double m) { return omega*m*x*x/2;});
 
     std::cerr << "Time elapsed to set everything up: " << timer.elapsed() << " seconds\n";
     H1.solve('V');

@@ -8,10 +8,10 @@ Hamiltonian::Hamiltonian(std::size_t dim, double leftBound, double rightBound, d
 Hamiltonian::Hamiltonian(const Grid& grid, double mass) : grid(grid), 
                             H(grid.getDim()), mass(mass)
 {
-    SetKynetic4Ord();
+    setKinetic4Ord();
 }
 
-void Hamiltonian::SetKynetic2Ord(){
+void Hamiltonian::setKinetic2Ord(){
     const double step = grid.getStep();
     const std::size_t dim = grid.getDim();
     
@@ -24,7 +24,7 @@ void Hamiltonian::SetKynetic2Ord(){
     H(dim-1, dim-1) += 2 * factor;
 }
 
-void Hamiltonian::SetKynetic4Ord(){
+void Hamiltonian::setKinetic4Ord(){
     const double step = grid.getStep();
     const std::size_t dim = grid.getDim();
 
@@ -46,7 +46,7 @@ void Hamiltonian::SetKynetic4Ord(){
     H(i,i) = 5.0/2.0 * factor;
 }
 
-void Hamiltonian::SetPotential(double (*potFunction)(double, double)){
+void Hamiltonian::setPotential(double (*potFunction)(double, double)){
     const std::size_t dim = grid.getDim();
     for(size_t i = 0; i < dim; i++){
         H(i,i) += potFunction(grid.getNthPoint(i), mass);

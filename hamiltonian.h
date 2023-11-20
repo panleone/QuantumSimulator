@@ -21,9 +21,9 @@ class Hamiltonian{
         const double mass;
 
         // Generates the kynetic term of the hamiltonian up to second order in the grid step
-        void SetKynetic2Ord();
+        void setKinetic2Ord();
         // Generate the kynetic term of the hamiltonian up to fourth order in the grid step
-        void SetKynetic4Ord();
+        void setKinetic4Ord();
     public:
         /**
          * @brief Creates an hamiltonian with empty potential and default kynetic term
@@ -40,7 +40,7 @@ class Hamiltonian{
          * 
          * @param potFunction - function : (x, mass) -> V(x,m) 
          */
-        void SetPotential(double (*potFunction)(double, double));
+        void setPotential(double (*potFunction)(double, double));
         const HermitianMatrix& getHamiltonian() const;
 
         /**
