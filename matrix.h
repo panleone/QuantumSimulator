@@ -104,7 +104,7 @@ Matrix<T> operator-(const Matrix<T>& m1, const Matrix<T>& m2){
 template<typename T>
 Matrix<T>& Matrix<T>::operator+=(const Matrix<T>& m1){
     assert(m1.getDimX() == getDimX() && m1.getDimY() == getDimY() && "Cannot sum matrices of different sizes!");
-    for(int i = 0; i< getDimX()*getDimY(); i++){
+    for(size_t i = 0; i< getDimX()*getDimY(); i++){
         matData[i] += m1.matData[i];
     }
     return *this;

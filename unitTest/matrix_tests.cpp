@@ -3,32 +3,11 @@
 #include <cmath>
 #include <vector>
 
+#include "test_utils.h"
 #include "../matrix.h"
 #include "../hermitianMatrix.h"
 #include "../random.h"
 #include "../constants.h"
-
-
-/**
- * @brief BOOST_CHECK that two complex numbers are the same with precision epsilon
- */
-void CompareComplexNumbers(const std::complex<double>& c1, const std::complex<double>& c2){
-    BOOST_CHECK_SMALL(c1.imag() - c2.imag(), epsilon);
-    BOOST_CHECK_SMALL(c1.real() - c2.real(), epsilon);
-}
-
-/**
- * @brief Check element by element that two matrices are the same, with precision epsilon
- */
-void CompareMatrices(const Matrix<std::complex<double>>& m1, const Matrix<std::complex<double>>& m2){
-    BOOST_CHECK(m1.getDimX() == m2.getDimX());
-    BOOST_CHECK(m1.getDimY() == m2.getDimY());
-    for(int i = 0; i < m1.getDimX(); i++){
-        for(int j = 0; j < m1.getDimY(); j++){
-            CompareComplexNumbers(m1(i,j), m2(i,j));
-        }
-    }
-}
 
 /**
  * @brief  Test basically all matrix functions
@@ -52,8 +31,8 @@ BOOST_AUTO_TEST_CASE(matrix_operations_test)
     BOOST_CHECK(m3.getDimY() == m1.getDimY());
     BOOST_CHECK(m4.getDimX() == m1.getDimX());
     BOOST_CHECK(m4.getDimY() == m1.getDimY());
-    for(int i = 0; i < m1.getDimX(); i++){
-        for(int j = 0; j < m1.getDimY(); j++){
+    for(size_t i = 0; i < m1.getDimX(); i++){
+        for(size_t j = 0; j < m1.getDimY(); j++){
             CompareComplexNumbers(m3(i,j), m1(i,j) + m2(i,j));
             CompareComplexNumbers(m4(i,j), m1(i,j) - m2(i,j));
         }
@@ -72,8 +51,8 @@ BOOST_AUTO_TEST_CASE(matrix_operations_test)
     Matrix<std::complex<double>> m5 = m4 * factor;
     BOOST_CHECK(m5.getDimX() == m4.getDimX());
     BOOST_CHECK(m5.getDimY() == m4.getDimY());
-    for(int i = 0; i < m5.getDimX(); i++){
-        for(int j = 0; j < m5.getDimY(); j++){
+    for(size_t i = 0; i < m5.getDimX(); i++){
+        for(size_t j = 0; j < m5.getDimY(); j++){
             CompareComplexNumbers(m4(i,j) * factor, m5(i,j));
         }
     }
