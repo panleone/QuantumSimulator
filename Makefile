@@ -2,7 +2,7 @@ CC=gcc
 CXX=g++
 CFLAGS=-O3 -march=native -ffast-math
 CXXFLAGS=$(CFLAGS)
-LDFLAGS=-llapack -lopenblas
+LDFLAGS=-llapack -lopenblas -lfftw3_threads -lfftw3 -lm
 SRC=$(shell find . -path ./unitTest -prune -o -name '*.cpp' ! -name 'main.cpp' -print)
 HEADERS = $(shell find . -type f -name '*.h')
 OBJ = $(SRC:%.cpp=%.o)
