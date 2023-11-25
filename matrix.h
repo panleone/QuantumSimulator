@@ -49,6 +49,9 @@ class Matrix{
         friend Matrix<T> operator* <>(const T& c,const Matrix<T>& m1);
         Matrix<T> operator-() const;
         Matrix<T>& operator+=(const Matrix<T>& m1);
+        Matrix<T>& operator-=(const Matrix<T>& m1);
+        Matrix<T>& operator*=(const T& c1);
+        Matrix<T>& operator/=(const T& c1);
 };
 
 template<typename T>
@@ -70,8 +73,8 @@ template<typename T>
  */
 std::ostream& operator<<(std::ostream& o, const Matrix<T>& m1){
     //TODO: find a more efficient way to print
-    for(int j = 0;j < m1.getDimX(); j++){
-        for(int i = 0; i < m1.getDimY(); i++){       
+    for(size_t j = 0;j < m1.getDimX(); j++){
+        for(size_t i = 0; i < m1.getDimY(); i++){       
             o << m1.matData.at(j + i*m1.getDimX()) << " ";
         }
         o << "\n";
@@ -108,6 +111,28 @@ Matrix<T>& Matrix<T>::operator+=(const Matrix<T>& m1){
         matData[i] += m1.matData[i];
     }
     return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::operator-=(const Matrix<T>& m1){
+    assert(m1.getDimX() == getDimX() && m1.getDimY() == getDimY() && "Cannot subtract matrices of different sizes!");
+    for(size_t i = 0; i< getDimX()*getDimY(); i++){
+        matData[i] -= m1.matData[i];
+    }
+    return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::operator*=(const T& c1){
+    for(size_t i = 0; i< getDimX()*getDimY(); i++){
+        matData[i] *= c1;
+    }
+    return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::operator/=(const T& c1){
+    return (*this)*= (1.0/c1);
 }
 
 template<typename T>

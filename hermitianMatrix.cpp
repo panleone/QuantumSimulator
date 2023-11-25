@@ -121,3 +121,7 @@ const Matrix<std::complex<double>>& HermitianMatrix::getEigenVectors() const {
     assert(loadedEigenVectors && " Hamiltonian hasnt been solved yet");
     return *this;
 }
+
+size_t HermitianMatrix::getDim() const {
+    return getDimX();
+}

@@ -2,6 +2,7 @@
 #define GRID
 
 #include <cstddef> 
+#include <ostream>
 
 /**
  * @brief This class represents a Grid that discretizes a given real interval [a, b]
@@ -33,10 +34,9 @@ class Grid{
          * @return double - the coordinate of the n-th point
          */
         double getNthPoint(std::size_t n) const;
-        /**
-         * @brief Returns the step of the grid
-         */
+        // Returns the step of the grid
         double getStep() const;
+        friend std::ostream& operator<<(std::ostream& o, const Grid& grid);
 };
 
 #endif //GRID

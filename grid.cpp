@@ -16,9 +16,20 @@ double Grid::getRightBound() const {
 }
 double Grid::getNthPoint(std::size_t n) const {
     assert(n < dim && "the grid has only dim points!");
-    double step = (rightBound - leftBound)/(dim - 1.0);
-    return leftBound + n*step;
+    return leftBound + n*getStep();
 }
 double Grid::getStep() const {
     return (rightBound - leftBound)/(dim - 1.0);
+}
+
+std::ostream& operator<<(std::ostream& o, const Grid& grid){
+    o << "[";
+    for(size_t i = 0; i < grid.dim; i++ ){
+        o << " " << grid.getNthPoint(i);
+        if(i != grid.dim -1){
+            o << ",";
+        }
+    }
+    o << "]";
+    return o;
 }
