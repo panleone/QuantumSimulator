@@ -77,18 +77,18 @@ BOOST_AUTO_TEST_CASE(hermitian_matrix_tests){
     HermitianMatrix m1Copy = m1Re;
 
     // find eigenvalues (this call with destroy the content of m1Re)
-    BOOST_CHECK(m1Re.findSpectrum('N'));
+    BOOST_CHECK(m1Re.findSpectrumAlg2('N'));
     // eigenvalues must be: 1/2(3 \pm sqrt(5))
     BOOST_CHECK_SMALL(m1Re.getEigenValues()[0] - 0.5*(3-sqrt(5)) , epsilon);
     BOOST_CHECK_SMALL(m1Re.getEigenValues()[1] - 0.5*(3+sqrt(5)) , epsilon);
 
     // At this point the original m1 is destroyed, we have only eigenvalues but not eigenvectors
     // and we cannot recall findSpectrum
-    BOOST_CHECK(!m1Re.findSpectrum('V'));
+    BOOST_CHECK(!m1Re.findSpectrumAlg2('V'));
     // If we try to find again eigenvalues of course this will just return true, since we already calculated them.
-    BOOST_CHECK(m1Re.findSpectrum('N'));
+    BOOST_CHECK(m1Re.findSpectrumAlg2('N'));
     // To actually find eigenvectors let's use the copy
-    BOOST_CHECK(m1Copy.findSpectrum('V'));
+    BOOST_CHECK(m1Copy.findSpectrumAlg2('V'));
     // normalize eigenvectors in such a way that the second component is 1
     std::vector<std::complex<double>> eigenVector1 = {m1Copy(0,0), m1Copy(1,0)};
     std::vector<std::complex<double>> eigenVector2 = {m1Copy(0,1), m1Copy(1,1)};
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(hermitian_matrix_tests){
     // check that eigenvalues are normalized, for a random big 100x100 matrix
     constexpr double dim = 100;
     HermitianMatrix m2 = randomComplexLTHermitianMatrix(dim);
-    m2.findSpectrum('V');
+    m2.findSpectrumAlg2('V');
     for(int i = 0; i < dim-1; i++){
         BOOST_CHECK(m2.getEigenValues()[i+1] >= m2.getEigenValues()[i]);
     }
