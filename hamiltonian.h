@@ -38,7 +38,13 @@ class Hamiltonian : public HermitianMatrix{
          * @return true iff the operation was succesful
          */
         bool setTime(size_t newTimeIndex);
-        
+
+        /**
+         * @brief Applies exp^{-iV*(\Delta t)/2} to a wavefunction,
+         * it's an internal function used by applyTimeEvolutionOperator
+         */
+        void applyTimeEvolutionPotentialPart(WaveFunction& wavefunction) const;
+
         // Make this operator private since the Hamiltonian should not be changed externally
         using HermitianMatrix::operator();
     public:
@@ -49,9 +55,9 @@ class Hamiltonian : public HermitianMatrix{
          * @param mass - mass of the particle
          * @param potFunction - potential energy V: (x, mass, time) -> V(x, m, time) 
          */
-        explicit Hamiltonian(const Grid& spaceGrid, double mass, std::function<double(double, double, double)> potFunction);
+        explicit Hamiltonian(const Grid& spaceGrid, double mass, const std::function<double(double, double, double)>& potFunction);
         // Creates a time dependent hamiltonian, a timeGrid must be provided
-        explicit Hamiltonian(const Grid& spaceGrid, const Grid& timeGrid, double mass, std::function<double(double, double, double)> potFunction);
+        explicit Hamiltonian(const Grid& spaceGrid, const Grid& timeGrid, double mass, const std::function<double(double, double, double)>& potFunction);
 
         /**
          * @brief increment the current hamiltonian time by one unit
