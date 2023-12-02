@@ -1,26 +1,12 @@
-#include <cmath>
+#include <cassert>
+#include <complex>
 #include <cstddef>
 #include <iostream>
-#include <math.h>
-#include "constants.h"
-#include "hamiltonian.h"
-#include "timer.h"
-#include <fstream>
+#include <vector>
 
-/**
- * @brief Computes the n-th theoretical eigenvector for the harmonic oscillator at point x
- * 
- * @param n - n-th eigenstate \ket{\psi_{n}}
- * @param x - coordinate at which we want to evaluate \psi_{n}
- * @return double \psi_{n}(x)
- */
-double teoSol(int n, double x, double mass, double omega){
-    const double param = mass*omega/hslash;
-    const double factor1 = pow(sqrt(pow(2, n)*tgamma(n+1)), -0.5);
-    const double factor2 = exp(-param*x*x/2);
-    const double factor3 = pow(param/M_PI, 0.25);
-    return factor1 * factor2 * factor3 * std::hermite(n, x*sqrt(param));
-}
+#include "functions.h"
+#include "hamiltonian.h"
+#include "wavefunction.h"
 
 template<typename T>
 /**
@@ -39,62 +25,65 @@ bool parseInput(T& parsedVar, const std::string& argv){
     return true;
 }
 
-/**
- * @brief Solves the Quantum Harmonic Oscillator and outputs eigenvectors and eigenvalues.
- */
 int main(int argc, char **argv){
-    
-    // Correctly parse the input
-    if ( argc != 3){
-        std::cerr << "Run the program with only two argument!\n\
--first argument  arg1 (positive double) the interval extremes [-arg1, arg1] on which the shrodinger equation is solved\n\
--second argument arg2 (uint) the discretization dimension: the interval will be discretized in arg2 steps" << std::endl;
-        return 0;
-    }
+    // Discretize the time by dividing [0, maxT] in timeDim points
+    constexpr double maxT = 10*3;
+    constexpr size_t timeDim = 5000*3;
+    Grid timeGrid = Grid(0,maxT,timeDim);
 
-    double latticeBound;
-    std::size_t dim;
-    if(!parseInput(latticeBound, argv[1]) || !parseInput(dim, argv[2])) return 0;
-    if(dim<2){
-        std::cerr << "arg2 must be at LEAST 2" <<std::endl;
-        return 0;
-    }
-    if(latticeBound < 0){
-        std::cerr << "arg1 MUST BE positive" << std::endl;
-    }
+    // Discretize the space by dividing [-spaceGridBound, spaceGridBound] in spaceDim points
+    constexpr size_t spaceDim = 20000;
+    constexpr double maxSpace = 40;
+    Grid spaceGrid = Grid(-maxSpace,maxSpace,spaceDim);
 
-    // Parameters of our problem
+    //We are considering a moving potential in the range [0, potFinalPosition]
+    constexpr double potFinalPosition = 10;
+    // particle and potential parameters
     constexpr double mass = 1.0;
     constexpr double omega = 1.0;
-    Timer timer;
-    // Grid on which we are solving the shrodinger equation
-    Grid grid(-latticeBound, latticeBound, dim);
 
-    // Create the Hamiltonian and set potential with a lambda
-    Hamiltonian H1(grid, mass);
-    H1.setPotential( [](double x, double m) { return omega*m*x*x/2;});
+    Hamiltonian H(Grid(-maxSpace, maxSpace, 2), timeGrid, mass, 
+                    [](double x, double m, double t) { return m*omega*pow(x -potFinalPosition*t/maxT,2)/2;});
+    
+    WaveFunction wavefunction(spaceGrid);
+    // Vector where the average positions of the W.F. are saved
+    std::vector<double> posAverage(timeDim-1);
+    std::vector<double> posVariance(timeDim-1);
+    // Number of snapshoots of the wave function we are taking
+    constexpr size_t nSnapshoots = 600;
+    Matrix<double> wavefunctionSnapshoots(nSnapshoots, spaceDim);
 
-    std::cerr << "Time elapsed to set everything up: " << timer.elapsed() << " seconds\n";
-    H1.solve('V');
-    std::cerr << "Time elapsed to solve: " << timer.elapsed() << " seconds\n";
+    // At time t = 0 our wavefunction is in the 0-th eigenvalue of H(t=0)
+    for(size_t i = 0; i < spaceDim; i++){
+        wavefunction(i) = HarmonicOscillatorWaveFunction(0, spaceGrid.getNthPoint(i), mass, omega);
+    }
+    wavefunction/= wavefunction.getNorm();
 
-    // Save data on file
-    for(size_t i = 0; i < dim; i ++){
-        std::cout << H1.getHamiltonian().getEigenValues().at(i) << " " ;
+    // Evolve the system
+    for(size_t i = 0; i < timeDim -1;i++){
+        H.applyTimeEvolutionOperator(wavefunction);
+        assert(H.incrementTime());
+        posAverage.at(i) = wavefunction.positionAverage();
+        posVariance.at(i) = wavefunction.positionVariance();
+
+        // Take a snapshoot of the wave function every (timeDim/nSnapshoots) time intervals
+        if(i % (timeDim/nSnapshoots) == 0){
+            size_t currSnapshot = i/(timeDim/nSnapshoots);
+            std::cerr << "Snapshoot taken:" << " " <<currSnapshot << " of " << nSnapshoots<< std::endl;
+            for(size_t j = 0; j < spaceDim; j++){
+                wavefunctionSnapshoots(currSnapshot, j) = std::norm(wavefunction(j));
+            }
+        }
+    }
+    // cout the average positions and variance
+    for(auto& x : posAverage){
+        std::cout << x << " ";
     }
     std::cout << "\n";
-    // Save eigenfunctions on file
-    int selected;    
-    while(true){
-        std::cerr << "Which eigenfunction you want to output? (insert -1 to terminate)" << std::endl;
-        std::cin >> selected;
-        if(selected < 0 || selected >= dim){
-            break;
-        }
-        for(size_t i = 0; i < dim; i ++){
-            std::cout << H1.getHamiltonian().getEigenVectors()(i, selected) << " " ;
-        }
-        std::cout << "\n";
+    for(auto& x : posVariance){
+        std::cout << x << " ";
     }
+    std::cout << "\n";
+    std::cout << wavefunctionSnapshoots << std::endl;
 return 0;
 }

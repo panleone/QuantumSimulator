@@ -11,11 +11,11 @@
 #include <vector>
 
 //TODO: allocate the memory for the hermitian matrix only when the function solve() is called
-Hamiltonian::Hamiltonian(const Grid& spaceGrid, double mass, std::function<double(double, double, double)> potFunction) : HermitianMatrix(spaceGrid.getDim()),
+Hamiltonian::Hamiltonian(const Grid& spaceGrid, double mass, const std::function<double(double, double, double)>& potFunction) : HermitianMatrix(spaceGrid.getDim()),
                             spaceGrid(spaceGrid), mass(mass), potential(std::move(potFunction))
 {}
 
-Hamiltonian::Hamiltonian(const Grid& spaceGrid, const Grid& timeGrid, double mass, std::function<double(double, double, double)> potFunction) :  HermitianMatrix(spaceGrid.getDim()),
+Hamiltonian::Hamiltonian(const Grid& spaceGrid, const Grid& timeGrid, double mass, const std::function<double(double, double, double)>& potFunction) :  HermitianMatrix(spaceGrid.getDim()),
                             spaceGrid(spaceGrid), timeGrid(timeGrid), mass(mass), potential(std::move(potFunction))
 {}
 
@@ -87,32 +87,38 @@ bool Hamiltonian::incrementTime(){
 void Hamiltonian::applyTimeEvolutionOperator(WaveFunction& wavefunction) const{
     // Bail out early if no timeGrid has been provided
     if(!timeGrid.has_value()) return;
-
+    // Make sure the WF is in coordinate space
     if(wavefunction.isFourierTransformed()) wavefunction.FFT();
     const std::complex<double> imUnit = std::complex<double>(0,1);
     const double timeStep = timeGrid->getStep();
-    const double t = timeGrid->getNthPoint(this->currentTimeIndex);
 
     // 1) Apply exp^{-iV*(\Delta t)/2}
-    for(size_t i = 0;i < wavefunction.getDim(); i++){
-        const double x = wavefunction.getPosition(i);
-        wavefunction(i)*= std::exp(-imUnit*potential(x, mass, t)*timeStep/2.0);
-    }
+    applyTimeEvolutionPotentialPart(wavefunction);
+
     // 2) FFT and apply exp^{-iT*(\Delta t)}
     wavefunction.FFT();
     for(size_t i = 0;i < wavefunction.getDim(); i++){
         const double p = wavefunction.getMomentum(i);
         const double kinEnergy = p*p/(2*mass);
-        //std::cerr << kinEnergy << std::endl;
         wavefunction(i)*= std::exp(-imUnit*kinEnergy*timeStep);
     }
     // 3) FFT again and apply exp^{-iV*(\Delta t)/2}
     wavefunction.FFT();
+    applyTimeEvolutionPotentialPart(wavefunction);
+}
+
+void Hamiltonian::applyTimeEvolutionPotentialPart(WaveFunction& wavefunction) const{
+    assert(!wavefunction.isFourierTransformed() && "WF is in momentum representation");
+    const std::complex<double> imUnit = std::complex<double>(0,1);
+    const double timeStep = timeGrid->getStep();
+    const double t = timeGrid->getNthPoint(this->currentTimeIndex);
+    // Apply exp^{-iV*(\Delta t)/2}
     for(size_t i = 0;i < wavefunction.getDim(); i++){
         const double x = wavefunction.getPosition(i);
         wavefunction(i)*= std::exp(-imUnit*potential(x, mass, t)*timeStep/2.0);
     }
 }
+
 // TODO: rewrite this once matrix multiplication is defined 
 double Hamiltonian::calculateEnergy(WaveFunction& wavefunction) const{
     std::complex<double> res = 0;
