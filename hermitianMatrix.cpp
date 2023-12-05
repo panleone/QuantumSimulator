@@ -5,14 +5,6 @@
 #include "linker.h"
 #include "matrix.h"
 
-std::complex<double> HermitianMatrix::trace() const{
-    std::complex<double> trace{0, 0};
-    for(std::size_t i = 0; i < getDimX(); i++){
-        trace += (*this)(i,i);
-    }
-    return trace;
-}
-
 // TODO: and UPLO as inputs
 bool HermitianMatrix::findSpectrum(char JOBZ) {
     // If we alredy fully solved return true
@@ -26,7 +18,7 @@ bool HermitianMatrix::findSpectrum(char JOBZ) {
         }
     }
 
-    int dim = getDimX();
+    int dim = getDim();
 
     // Store lower triangle of m1
     char UPLO = 'L';
@@ -70,7 +62,7 @@ bool HermitianMatrix::findSpectrumAlg2(char JOBZ) {
         }
     }
 
-    int dim = getDimX();
+    int dim = getDim();
 
     // Store lower triangle of m1
     char UPLO = 'L';
@@ -122,6 +114,3 @@ const Matrix<std::complex<double>>& HermitianMatrix::getEigenVectors() const {
     return *this;
 }
 
-size_t HermitianMatrix::getDim() const {
-    return getDimX();
-}
