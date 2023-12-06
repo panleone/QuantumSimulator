@@ -7,16 +7,11 @@
 #include <vector>
 
 /**
- * TODO: add more layers of abstraction?
  * TODO: optimize, since the matrix is hermitian we can get rid of almost half of the memory
  * @brief class for Hermitian Matrices with useful functions
  */
-class HermitianMatrix : public Matrix<std::complex<double>>
+class HermitianMatrix : public SquareMatrix<std::complex<double>>
 {
-    private:
-        // Those are private since we use getDim() in place
-        using Matrix<std::complex<double>>::getDimX;
-        using Matrix<std::complex<double>>::getDimY;
     protected:
         //True if we eigenvalues of the hamiltonian have been computed,
         bool loadedEigenValues = false;
@@ -26,12 +21,8 @@ class HermitianMatrix : public Matrix<std::complex<double>>
         //True if we eigenvalues of the hamiltonian have been computed.
         bool loadedEigenVectors = false;
     public:
-        explicit HermitianMatrix(std::size_t dim) : Matrix<std::complex<double>>(dim, dim), eigenValues(dim)
+        explicit HermitianMatrix(std::size_t dim) : SquareMatrix<std::complex<double>>(dim), eigenValues(dim)
         {};
-        /**
-         * @brief Computes the trace of the matrix 
-         */
-        std::complex<double> trace() const; 
         /**
          * @brief Find eigenvalues and eigenvectors of the hermitian matrix:
          * AFTER CALLING THIS FUNCTION THE MATRIX CONTENT IS DESTROYED
@@ -48,8 +39,6 @@ class HermitianMatrix : public Matrix<std::complex<double>>
         bool isSolved() const;
         const std::vector<double>& getEigenValues() const;
         const Matrix<std::complex<double>>& getEigenVectors() const;
-        // Returns the dimension of the vector representing the matrix
-        size_t getDim() const;
 };
 
 

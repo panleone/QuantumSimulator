@@ -170,6 +170,31 @@ const T& Matrix<T>::operator()(std::size_t x, std::size_t y) const{
     return matData.at(x + y*getDimX());
 }
 
+template<typename T>
+/**
+ * @brief Template class that represents a generic Square Matrix M, basic functions are provided
+ * 
+ */
+class SquareMatrix : public Matrix<T>{
+    public:
+        explicit SquareMatrix(std::size_t size) : Matrix<T>(size, size){};
+        size_t getDim() const { return getDimX();}
+        // Returns the trace of the matrix
+        T trace() const;
+    private:
+        // Those are private since we use getDim() in place
+        using Matrix<T>::getDimX;
+        using Matrix<T>::getDimY;
+};
+
+template<typename T>
+T SquareMatrix<T>::trace() const{
+    T trace;
+    for(std::size_t i = 0; i < getDim(); i++){
+        trace += (*this)(i,i);
+    }
+    return trace;
+}
 #endif // MATRIX
         
 
