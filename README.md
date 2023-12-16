@@ -1,7 +1,7 @@
 # QuantumSimulator
 Homeworks/ Project for the course quantum informations and computing 2023/2024 written in C++.
 It can be built in two ways:
- - `make` that will generate the executable `quantumSimulator` (which at the moment simulates a time dependent quantum harmonic oscillator, i.e. 5th homework)
+ - `make` that will generate the executable `quantumSimulator` (which at the moment solves the Quantum Ising Model, i.e. 7th homework)
  - `make test` that will generate the executable `test` which runs BOOST unit tests.
 
 To build the following dependencies are required
