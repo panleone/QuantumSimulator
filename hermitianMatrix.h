@@ -21,6 +21,7 @@ class HermitianMatrix : public SquareMatrix<std::complex<double>>
         //True if we eigenvalues of the hamiltonian have been computed.
         bool loadedEigenVectors = false;
     public:
+        HermitianMatrix(const SquareMatrix<std::complex<double>>&& mat) : SquareMatrix<std::complex<double>>(mat), eigenValues(mat.getDim()) {};
         explicit HermitianMatrix(std::size_t dim) : SquareMatrix<std::complex<double>>(dim), eigenValues(dim)
         {};
         /**
