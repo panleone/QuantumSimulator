@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <cmath>
+#include <complex>
 #include <vector>
 
 #include "test_utils.h"
@@ -121,6 +122,66 @@ BOOST_AUTO_TEST_CASE(hermitian_matrix_tests){
             normalization += std::norm(m2.getEigenVectors()(j,i));
         }
         BOOST_CHECK_SMALL(normalization - 1, epsilon);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(matrix_tensor_product){
+    //Test 1:
+    // tensor product between
+    // (1, 1)  and (1, 0)
+    // (1, 1)      (0, 1)
+    Matrix<std::complex<double>> m1(2, 2);
+    m1(0,0) = 1.0;
+    m1(0,1) = 1.0;
+    m1(1,0) = 1.0;
+    m1(1,1) = 1.0;
+    Matrix<std::complex<double>> m2(2, 2);
+    m2(0,0) = 1.0;
+    m2(1,1) = 1.0;
+    // (1, 0, 1, 0)
+    // (0, 1, 0, 1)
+    // (1, 0, 1, 0)
+    // (0, 1, 0, 1)
+    Matrix<std::complex<double>> m3 = tens_product(m1,m2);
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+            CompareComplexNumbers(m3(i, j), ((i + j)%2 == 0) ? 1.0 : 0.0);
+        }
+    }
+    // (1, 1, 0, 0)
+    // (1, 1, 0, 0)
+    // (0, 0, 1, 1)
+    // (0, 0, 1, 1)
+    Matrix<std::complex<double>> m4 = tens_product(m2,m1);
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+            if((i < 2 && j < 2 )|| (i>=2 && j>=2)){
+                CompareComplexNumbers(m4(i, j), 1.0);
+            }else{
+                CompareComplexNumbers(m4(i, j), 0.0);
+            }
+        }
+    }
+    // Test 2:
+    // tensor product between
+    // (2)  (0, 5)
+    // (0)
+    Matrix<std::complex<double>> m5(2, 1);
+    m5(0, 0) = 2.0;
+    m5(1, 0) = 0.0;
+    Matrix<std::complex<double>> m6(1, 2);
+    m6(0,0) = 0.0;
+    m6(0,1) = 5.0;
+    // (0, 10)
+    // (0,  0)
+    Matrix<std::complex<double>> m7 = tens_product(m5,m6);
+    Matrix<std::complex<double>> m8 = tens_product(m6,m5);
+    
+    for(int i = 0; i < 2; i++){
+        for(int j = 0; j < 2; j++){
+            CompareComplexNumbers(m7(i, j), (i == 0 && j == 1) ? 10.0 : 0.0);
+            CompareComplexNumbers(m8(i, j), (i == 0 && j == 1) ? 10.0 : 0.0);
+        }
     }
 }
 BOOST_AUTO_TEST_SUITE_END()
