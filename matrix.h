@@ -3,6 +3,7 @@
 
 #include <cassert> // assert
 #include <cstddef> // std::size_t
+#include <iostream>
 #include <ostream>
 #include <vector>
 
@@ -18,6 +19,8 @@ template<typename T>
 Matrix<T> operator*(const Matrix<T>& m1, const T& c);
 template<typename T>
 Matrix<T> operator*(const T& c ,const Matrix<T>& m1);
+template<typename T>
+Matrix<T> tens_product(const Matrix<T>& m1 ,const Matrix<T>& m2);
 
 template<typename T>
 /**
@@ -47,6 +50,8 @@ class Matrix{
         friend Matrix<T> operator- <>(const Matrix<T>& m1, const Matrix<T>& m2);
         friend Matrix<T> operator* <>(const Matrix<T>& m1, const T& c);
         friend Matrix<T> operator* <>(const T& c,const Matrix<T>& m1);
+        friend Matrix<T> tens_product <>(const Matrix<T>& m1, const Matrix<T>& m2);
+
         Matrix<T> operator-() const;
         Matrix<T>& operator+=(const Matrix<T>& m1);
         Matrix<T>& operator-=(const Matrix<T>& m1);
@@ -164,11 +169,31 @@ Matrix<T> operator*(const T& c, const Matrix<T>& m1) {
 }
 
 template<typename T>
+Matrix<T> tens_product(const Matrix<T>& m1 ,const Matrix<T>& m2) {
+    Matrix<T> res(m1.getDimX()*m2.getDimX(), m1.getDimY()*m2.getDimY());
+    for(int i = 0; i < m1.getDimX(); i++){
+        for(int j = 0; j < m1.getDimY(); j++){
+            for(int k = 0; k < m2.getDimX(); k++){
+                for(int l = 0; l < m2.getDimY(); l++){
+                    res(m2.getDimX()*i+k, m2.getDimY()*j+l) = m1(i,j)*m2(k,l);
+                }    
+            }
+        }
+    }
+    return res;
+}
+
+template<typename T>
 const T& Matrix<T>::operator()(std::size_t x, std::size_t y) const{
     assert( x < getDimX() && "x coordinate out of bound in get()!");
     assert( y < getDimY() && "y coordinate out of bound in get()!");
     return matData.at(x + y*getDimX());
 }
+
+template<typename T>
+class SquareMatrix;
+template<typename T>
+SquareMatrix<T> tens_product(const SquareMatrix<T>& m1 ,const SquareMatrix<T>& m2);
 
 template<typename T>
 /**
@@ -178,9 +203,13 @@ template<typename T>
 class SquareMatrix : public Matrix<T>{
     public:
         explicit SquareMatrix(std::size_t size) : Matrix<T>(size, size){};
+        SquareMatrix(const Matrix<T>&& m) : Matrix<T>(m) {
+            assert(m.getDimX() == m.getDimY() && "Matrix is not a square amtrix");
+        }
         size_t getDim() const { return getDimX();}
         // Returns the trace of the matrix
         T trace() const;
+        friend SquareMatrix<T> tens_product <>(const SquareMatrix<T>& m1, const SquareMatrix<T>& m2);
     private:
         // Those are private since we use getDim() in place
         using Matrix<T>::getDimX;
@@ -195,6 +224,12 @@ T SquareMatrix<T>::trace() const{
     }
     return trace;
 }
+
+template<typename T>
+SquareMatrix<T> tens_product(const SquareMatrix<T>& m1 ,const SquareMatrix<T>& m2) {
+    return tens_product(static_cast<const Matrix<T>&>(m1), static_cast<const Matrix<T>&>(m2));
+}
+
 #endif // MATRIX
         
 

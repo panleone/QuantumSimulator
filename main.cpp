@@ -3,10 +3,8 @@
 #include <cstddef>
 #include <iostream>
 #include <vector>
-
-#include "functions.h"
-#include "hamiltonian.h"
-#include "wavefunction.h"
+#include "timer.h"
+#include "hermitianMatrix.h"
 
 template<typename T>
 /**
@@ -26,64 +24,64 @@ bool parseInput(T& parsedVar, const std::string& argv){
 }
 
 int main(int argc, char **argv){
-    // Discretize the time by dividing [0, maxT] in timeDim points
-    constexpr double maxT = 10*3;
-    constexpr size_t timeDim = 5000*3;
-    Grid timeGrid = Grid(0,maxT,timeDim);
-
-    // Discretize the space by dividing [-spaceGridBound, spaceGridBound] in spaceDim points
-    constexpr size_t spaceDim = 20000;
-    constexpr double maxSpace = 40;
-    Grid spaceGrid = Grid(-maxSpace,maxSpace,spaceDim);
-
-    //We are considering a moving potential in the range [0, potFinalPosition]
-    constexpr double potFinalPosition = 10;
-    // particle and potential parameters
-    constexpr double mass = 1.0;
-    constexpr double omega = 1.0;
-
-    Hamiltonian H(Grid(-maxSpace, maxSpace, 2), timeGrid, mass, 
-                    [](double x, double m, double t) { return m*omega*pow(x -potFinalPosition*t/maxT,2)/2;});
-    
-    WaveFunction wavefunction(spaceGrid);
-    // Vector where the average positions of the W.F. are saved
-    std::vector<double> posAverage(timeDim-1);
-    std::vector<double> posVariance(timeDim-1);
-    // Number of snapshoots of the wave function we are taking
-    constexpr size_t nSnapshoots = 600;
-    Matrix<double> wavefunctionSnapshoots(nSnapshoots, spaceDim);
-
-    // At time t = 0 our wavefunction is in the 0-th eigenvalue of H(t=0)
-    for(size_t i = 0; i < spaceDim; i++){
-        wavefunction(i) = HarmonicOscillatorWaveFunction(0, spaceGrid.getNthPoint(i), mass, omega);
+    // Correctly parse the input
+    if ( argc != 3){
+        std::cerr << "Run the program with only two argument!\n\
+-first argument  arg1 (positive integer) the number of particles N that will be simulated, must be N>=2\n\
+-second argument arg2 (double) strength \\lambda of the external magnetic field " << std::endl;
+        return 0;
     }
-    wavefunction/= wavefunction.getNorm();
 
-    // Evolve the system
-    for(size_t i = 0; i < timeDim -1;i++){
-        H.applyTimeEvolutionOperator(wavefunction);
-        assert(H.incrementTime());
-        posAverage.at(i) = wavefunction.positionAverage();
-        posVariance.at(i) = wavefunction.positionVariance();
+    // Number of particles
+    size_t N = 0;
+    // Strength of external field
+    double lambda = 0.0;
+    if(!parseInput(N, argv[1]) || !parseInput(lambda, argv[2])) return 0;
+    if(N<2){
+        std::cerr << "arg1 must be at LEAST 2" <<std::endl;
+        return 0;
+    }
 
-        // Take a snapshoot of the wave function every (timeDim/nSnapshoots) time intervals
-        if(i % (timeDim/nSnapshoots) == 0){
-            size_t currSnapshot = i/(timeDim/nSnapshoots);
-            std::cerr << "Snapshoot taken:" << " " <<currSnapshot << " of " << nSnapshoots<< std::endl;
-            for(size_t j = 0; j < spaceDim; j++){
-                wavefunctionSnapshoots(currSnapshot, j) = std::norm(wavefunction(j));
-            }
+    // Build identity matrix
+    HermitianMatrix identity(2);
+    identity(0,0) = identity(1,1) = 1.0;
+
+    // Build sigma x
+    HermitianMatrix sigmaX(2);
+    sigmaX(0,1) = sigmaX(1,0) = 1.0;
+
+    // Build sigma z
+    HermitianMatrix sigmaZ(2);
+    sigmaZ(0,0) = 1.0;
+    sigmaZ(1,1) = -1.0;
+
+    // Build the Hamiltonian, it has size 2^N
+    HermitianMatrix H(pow(2, N));
+    Timer timer{};
+
+    // Add the Interaction with external magnetic field:
+    for(size_t i = 0; i < N; i++){
+        HermitianMatrix interaction = i == 0 ? sigmaZ : identity;
+        for(size_t j = 1; j < N; j++){
+            interaction = tens_product(interaction, ((j == i) ? sigmaZ : identity));
         }
+        H += interaction* static_cast<std::complex<double>>(lambda);
     }
-    // cout the average positions and variance
-    for(auto& x : posAverage){
-        std::cout << x << " ";
+    // Add the Interaction among nearest neighbor spins:
+    for(size_t i = 0; i < N-1; i++){
+        HermitianMatrix interaction = i == 0 ? sigmaX : identity;
+        for(size_t j = 1; j < N; j++){    
+            interaction = tens_product(interaction, ((j == i || j == i+1) ? sigmaX : identity)); 
+        }
+        H += interaction;
+    }
+    std::cerr << "Hamiltonian has been built, diagonalizing:" << std::endl;
+    // Find and print the spectrum
+    H.findSpectrumAlg2('N');
+    for(auto& E : H.getEigenValues()){
+        std::cout << E << " , ";
     }
     std::cout << "\n";
-    for(auto& x : posVariance){
-        std::cout << x << " ";
-    }
-    std::cout << "\n";
-    std::cout << wavefunctionSnapshoots << std::endl;
-return 0;
+    std::cerr << "Total time elapsed: " << timer.elapsed() << std::endl;
+    return 0;
 }
