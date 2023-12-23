@@ -21,6 +21,8 @@ template<typename T>
 Matrix<T> operator*(const T& c ,const Matrix<T>& m1);
 template<typename T>
 Matrix<T> tens_product(const Matrix<T>& m1 ,const Matrix<T>& m2);
+template<typename T>
+Matrix<T> matrix_product(const Matrix<T>& m1 ,const Matrix<T>& m2);
 
 template<typename T>
 /**
@@ -50,6 +52,7 @@ class Matrix{
         friend Matrix<T> operator* <>(const Matrix<T>& m1, const T& c);
         friend Matrix<T> operator* <>(const T& c,const Matrix<T>& m1);
         friend Matrix<T> tens_product <>(const Matrix<T>& m1, const Matrix<T>& m2);
+        friend Matrix<T> matrix_product <>(const Matrix<T>& m1, const Matrix<T>& m2);
 
         Matrix<T> operator-() const;
         Matrix<T>& operator+=(const Matrix<T>& m1);
@@ -183,6 +186,20 @@ Matrix<T> tens_product(const Matrix<T>& m1 ,const Matrix<T>& m2) {
 }
 
 template<typename T>
+Matrix<T> matrix_product(const Matrix<T>& m1 ,const Matrix<T>& m2) {
+    assert(m1.getDimY() == m2.getDimX());
+    Matrix<T> res(m1.getDimX(), m2.getDimY());
+    for(size_t j = 0; j < m2.getDimY(); j++){
+        for(size_t k = 0; k < m1.getDimY(); k++){
+            for(size_t i = 0; i < m1.getDimX(); i++){
+                res(i,j) += m1(i,k)*m2(k,j);
+            }
+        }
+    }
+    return res;
+}
+
+template<typename T>
 const T& Matrix<T>::operator()(std::size_t x, std::size_t y) const{
     assert( x < getDimX() && "x coordinate out of bound in get()!");
     assert( y < getDimY() && "y coordinate out of bound in get()!");
@@ -193,6 +210,8 @@ template<typename T>
 class SquareMatrix;
 template<typename T>
 SquareMatrix<T> tens_product(const SquareMatrix<T>& m1 ,const SquareMatrix<T>& m2);
+template<typename T>
+SquareMatrix<T> matrix_product(const SquareMatrix<T>& m1 ,const SquareMatrix<T>& m2);
 
 template<typename T>
 /**
@@ -209,6 +228,7 @@ class SquareMatrix : public Matrix<T>{
         // Returns the trace of the matrix
         T trace() const;
         friend SquareMatrix<T> tens_product <>(const SquareMatrix<T>& m1, const SquareMatrix<T>& m2);
+        friend SquareMatrix<T> matrix_product <>(const SquareMatrix<T>& m1, const SquareMatrix<T>& m2);
     private:
         // Those are private since we use getDim() in place
         using Matrix<T>::getDimX;
@@ -227,6 +247,11 @@ T SquareMatrix<T>::trace() const{
 template<typename T>
 SquareMatrix<T> tens_product(const SquareMatrix<T>& m1 ,const SquareMatrix<T>& m2) {
     return tens_product(static_cast<const Matrix<T>&>(m1), static_cast<const Matrix<T>&>(m2));
+}
+
+template<typename T>
+SquareMatrix<T> matrix_product(const SquareMatrix<T>& m1 ,const SquareMatrix<T>& m2) {
+    return matrix_product(static_cast<const Matrix<T>&>(m1), static_cast<const Matrix<T>&>(m2));
 }
 
 #endif // MATRIX

@@ -184,4 +184,60 @@ BOOST_AUTO_TEST_CASE(matrix_tensor_product){
         }
     }
 }
+
+BOOST_AUTO_TEST_CASE(matrix_multiplication_tests){
+    //Test 1:
+    // multiply by identity and verify that result does not change
+    // (1, 1)  and (1, 0)
+    // (1, 1)      (0, 1)
+    Matrix<std::complex<double>> m1(2, 2);
+    m1(0,0) = 1.0;
+    m1(0,1) = 1.0;
+    m1(1,0) = 1.0;
+    m1(1,1) = 1.0;
+    Matrix<std::complex<double>> m2(2, 2);
+    m2(0,0) = 1.0;
+    m2(1,1) = 1.0;
+    CompareMatrices(m1, matrix_product(m1,m2));
+    CompareMatrices(m1, matrix_product(m2,m1));
+    // Test 2:
+    // matrix product between
+    // (2)  (0, 10, 20)
+    // (3)
+    // (4)
+    Matrix<std::complex<double>> m3(3, 1);
+    m3(0, 0) = 2.0;
+    m3(1, 0) = 3.0;
+    m3(2, 0) = 4.0;
+    Matrix<std::complex<double>> m4(1, 3);
+    m4(0,0) = 0.0;
+    m4(0,1) = 10.0;
+    m4(0,2) = 20.0;
+    // (30 + 80) = 110
+    Matrix<std::complex<double>> m5(1, 1);
+    m5(0,0) = 110;
+    CompareMatrices(m5, matrix_product(m4,m3));
+    //Test 3:
+    // matrix product between
+    // (1 )  (0, 10, 20)
+    // (-1)  (30, 40, 50)
+    // (2 )
+    Matrix<std::complex<double>> m6(3, 1);
+    m6(0, 0) = 1.0;
+    m6(1, 0) = -1.0;
+    m6(2, 0) = 2.0;
+    Matrix<std::complex<double>> m7(2, 3);
+    m7(0, 0) = 0.0;
+    m7(0, 1) = 10.0;
+    m7(0, 2) = 20.0;
+    m7(1, 0) = 30.0;
+    m7(1, 1) = 40.0;
+    m7(1, 2) = 50.0;
+    Matrix<std::complex<double>> m8(2, 1);
+    // (30)
+    // (90)
+    m8(0, 0) = 30.0;
+    m8(1, 0) = 90.0;
+    CompareMatrices(m8, matrix_product(m7,m6));
+}
 BOOST_AUTO_TEST_SUITE_END()
