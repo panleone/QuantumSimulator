@@ -36,7 +36,6 @@ class Matrix{
 
     public:
         explicit Matrix(std::size_t nRows, std::size_t nColumns);
-        Matrix(const Matrix<T>& m1) = default;
 
         friend std::ostream& operator<< <> (std::ostream& o,const Matrix<T>& m);
         std::size_t getDimX() const {return nRows;};
@@ -203,8 +202,8 @@ template<typename T>
 class SquareMatrix : public Matrix<T>{
     public:
         explicit SquareMatrix(std::size_t size) : Matrix<T>(size, size){};
-        SquareMatrix(const Matrix<T>&& m) : Matrix<T>(m) {
-            assert(m.getDimX() == m.getDimY() && "Matrix is not a square amtrix");
+        SquareMatrix(Matrix<T>&& m) : Matrix<T>(std::move(m)) {
+            assert(getDimX() == getDimY() && "Matrix is not a square matrix");
         }
         size_t getDim() const { return getDimX();}
         // Returns the trace of the matrix

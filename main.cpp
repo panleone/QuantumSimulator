@@ -60,22 +60,24 @@ int main(int argc, char **argv){
     Timer timer{};
 
     // Add the Interaction with external magnetic field:
+    HermitianMatrix interaction = identity;
     for(size_t i = 0; i < N; i++){
-        HermitianMatrix interaction = i == 0 ? sigmaZ : identity;
+        interaction = i == 0 ? sigmaZ : identity;
         for(size_t j = 1; j < N; j++){
             interaction = tens_product(interaction, ((j == i) ? sigmaZ : identity));
         }
-        H += interaction* static_cast<std::complex<double>>(lambda);
+        interaction*= static_cast<std::complex<double>>(lambda);
+        H += interaction;
     }
     // Add the Interaction among nearest neighbor spins:
     for(size_t i = 0; i < N-1; i++){
-        HermitianMatrix interaction = i == 0 ? sigmaX : identity;
+        interaction = i == 0 ? sigmaX : identity;
         for(size_t j = 1; j < N; j++){    
             interaction = tens_product(interaction, ((j == i || j == i+1) ? sigmaX : identity)); 
         }
         H += interaction;
     }
-    std::cerr << "Hamiltonian has been built, diagonalizing:" << std::endl;
+    std::cerr << "Hamiltonian has been built, diagonalizing: "  << timer.elapsed() << std::endl;
     // Find and print the spectrum
     H.findSpectrumAlg2('N');
     for(auto& E : H.getEigenValues()){
