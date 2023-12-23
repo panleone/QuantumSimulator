@@ -170,10 +170,10 @@ Matrix<T> operator*(const T& c, const Matrix<T>& m1) {
 template<typename T>
 Matrix<T> tens_product(const Matrix<T>& m1 ,const Matrix<T>& m2) {
     Matrix<T> res(m1.getDimX()*m2.getDimX(), m1.getDimY()*m2.getDimY());
-    for(int i = 0; i < m1.getDimX(); i++){
-        for(int j = 0; j < m1.getDimY(); j++){
-            for(int k = 0; k < m2.getDimX(); k++){
-                for(int l = 0; l < m2.getDimY(); l++){
+    for(size_t j = 0; j < m1.getDimY(); j++){
+        for(size_t l = 0; l < m2.getDimY(); l++){
+            for(size_t i = 0; i < m1.getDimX(); i++){
+                for(size_t k = 0; k < m2.getDimX(); k++){
                     res(m2.getDimX()*i+k, m2.getDimY()*j+l) = m1(i,j)*m2(k,l);
                 }    
             }
