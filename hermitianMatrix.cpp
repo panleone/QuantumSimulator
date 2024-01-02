@@ -1,5 +1,6 @@
 #include <cassert>
 #include <complex>
+#include <cstddef>
 #include <iostream>
 #include "hermitianMatrix.h"
 #include "linker.h"
@@ -114,3 +115,27 @@ const Matrix<std::complex<double>>& HermitianMatrix::getEigenVectors() const {
     return *this;
 }
 
+// TODO: remove the first assert in future and load eigenVectors lazily
+const ComplexVector HermitianMatrix::getNthEigenVector(size_t N) const {
+    assert(loadedEigenVectors && " Hamiltonian hasnt been solved yet");
+    assert(N < getDim() && " EigenVector out of bound");
+    ComplexVector eigenvector{getDim()};
+    for(size_t i = 0; i < getDim(); i++){
+        eigenvector(i) = (*this)(i, N);
+    }
+    return eigenvector;
+}
+
+HermitianMatrix ComplexVector::getProjector() const {
+    return static_cast<SquareMatrix<std::complex<double>>>(tens_product(*this,getAdjoint()));
+}
+
+ComplexMatrix ComplexMatrix::getAdjoint() const {
+    ComplexMatrix adjoint{getDimY(), getDimX()};
+    for(size_t i = 0; i < getDimX(); i++){
+        for(size_t j = 0; j < getDimY(); j++){
+        adjoint(j,i) = std::conj((*this)(i,j));
+        }
+    }
+    return adjoint;
+}

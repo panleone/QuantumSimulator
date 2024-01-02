@@ -2,10 +2,12 @@
 #define HERMITIAN
 
 #include "matrix.h"
+#include <algorithm>
 #include <complex>
 #include <cstddef>
 #include <vector>
 
+class ComplexVector;
 /**
  * TODO: optimize, since the matrix is hermitian we can get rid of almost half of the memory
  * @brief class for Hermitian Matrices with useful functions
@@ -40,7 +42,33 @@ class HermitianMatrix : public SquareMatrix<std::complex<double>>
         bool isSolved() const;
         const std::vector<double>& getEigenValues() const;
         const Matrix<std::complex<double>>& getEigenVectors() const;
+        // Returns the N-th eigenvector of the matrix
+        const ComplexVector getNthEigenVector(size_t N) const;
 };
 
+class ComplexMatrix : public Matrix<std::complex<double>>
+{
+    public:
+        ComplexMatrix(const Matrix<std::complex<double>>& mat) : Matrix<std::complex<double>>(mat) {};
+        ComplexMatrix(const SquareMatrix<std::complex<double>>& mat) : Matrix<std::complex<double>>(mat) {};
+        ComplexMatrix(const SquareMatrix<std::complex<double>>&& mat) : Matrix<std::complex<double>>(std::move(mat)) {};
+        explicit ComplexMatrix(std::size_t nRows, std::size_t nColumns) : Matrix<std::complex<double>>(nRows,nColumns){};
+        ComplexMatrix getAdjoint() const;
+};
+
+class ComplexVector : public ComplexMatrix
+{
+    public:
+        explicit ComplexVector(std::size_t dim) : ComplexMatrix(dim,1){};
+        std::complex<double>& operator()(size_t i) {return Matrix<std::complex<double>>::operator()(i,0);};
+        const std::complex<double>& operator()(size_t i) const {return Matrix<std::complex<double>>::operator()(i,0);};
+        
+        size_t getDim() const {return getDimX();};
+        HermitianMatrix getProjector() const;
+    private:
+        // Those are private since we use getDim() in place
+        using Matrix<std::complex<double>>::getDimX;
+        using Matrix<std::complex<double>>::getDimY;
+};
 
 #endif //HERMITIAN
