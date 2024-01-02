@@ -16,6 +16,8 @@ Matrix<T> operator-(const Matrix<T>& m1, const Matrix<T>& m2);
 template<typename T>
 Matrix<T> operator+(const Matrix<T>& m1, const Matrix<T>& m2);
 template<typename T>
+Matrix<T> operator+(const Matrix<T>& m1, Matrix<T>&& m2);
+template<typename T>
 Matrix<T> operator*(const Matrix<T>& m1, const T& c);
 template<typename T>
 Matrix<T> operator*(const T& c ,const Matrix<T>& m1);
@@ -48,6 +50,7 @@ class Matrix{
 
         // Basic operations
         friend Matrix<T> operator+ <>(const Matrix<T>& m1, const Matrix<T>& m2);
+        friend Matrix<T> operator+ <>(const Matrix<T>& m1, Matrix<T>&& m2);
         friend Matrix<T> operator- <>(const Matrix<T>& m1, const Matrix<T>& m2);
         friend Matrix<T> operator* <>(const Matrix<T>& m1, const T& c);
         friend Matrix<T> operator* <>(const T& c,const Matrix<T>& m1);
@@ -94,6 +97,12 @@ Matrix<T> operator+(const Matrix<T>& m1, const Matrix<T>& m2){
     assert(m1.getDimX() == m2.getDimX() && m1.getDimY() == m2.getDimY() && "Cannot sum matrices of different sizes!");
     Matrix<T> res = m1;
     return res+=m2;
+}
+
+template<typename T>
+Matrix<T> operator+(const Matrix<T>& m1, Matrix<T>&& m2){
+    assert(m1.getDimX() == m2.getDimX() && m1.getDimY() == m2.getDimY() && "Cannot sum matrices of different sizes!");
+    return m2+=m1;
 }
 
 template<typename T>
