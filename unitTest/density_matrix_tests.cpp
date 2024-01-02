@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(density_matrix_constructor_test){
     waveFunctionTestB(2) = 0;
     waveFunctionTestB(3) = std::complex<double>(2,2);
     BOOST_CHECK(waveFunctionTestB.getDim() == 4);
-     BOOST_CHECK(waveFunctionTestB.getN() == 2);
+    BOOST_CHECK(waveFunctionTestB.getN() == 2);
     // Build the density matrix corresponding to the classical mixture  {|0><0|; |1><1|}, with same probability 1/2
     // (0.5, 0, 0, 0)
     // (0, 0, 0, 0)

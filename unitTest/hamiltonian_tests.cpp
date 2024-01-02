@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(hamiltonian_test_with_interaction){
     Grid grid(-latticeBound, latticeBound, dim);
     Hamiltonian H(grid, mass, [](double x, double m, double t) { return m*omega*x*x/2;});
     H.solve('V');
-    
+
     //BOOST check the first 400 eigenvalues
     for(size_t i = 0; i < 400; i ++){
         // we are fine if the difference between computed and expected is smaller than 1% of expected result
